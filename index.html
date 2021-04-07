@@ -1,0 +1,189 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+    <!--<meta http-equiv="refresh" content="2">-->
+    <title></title>
+	
+    <script src="js/jquery-latest.js"></script>
+    <!-- <script src="http://code.jquery.com/jquery-latest.js"></script> -->
+    <script type="text/javascript">
+        $(function () {
+            //参考：可以通过跨域方式获取其他服务器的当前时间作为服务器当前时间
+            var oCity = "北京"; //设置城市
+            $.ajax({
+                type: "GET", //默认是GET
+                url: "http://api.map.baidu.com/telematics/v3/weather?location=" + oCity + "&output=json&ak=ohA7QHfg0BBrpiY4kyuIAAsD",
+                dataType: "jsonp",
+                success: function (data) {
+                    //alert(data.date);
+                },
+                error: function (jqXHR) {
+                    //alert("信息错误" + jqXHR.status);
+                }
+            })
+        })
+    </script>
+</head>
+
+<body id="bodyId" onload="setTimer()" style="width:480px;">
+    <div
+        style="height:300px;background-color:#ff9933;background:url('images/title.png');background-repeat:no-repeat;background-size:100% 100%;">
+    </div>
+    <div>
+        <div style="height:260px;margin-top: 10px;">
+            <div style="float: left; margin-left:15px;font-family: Microsoft YaHei;font-size:18px;font-weight:bold;letter-spacing: 1px;">
+                <div style="color:gray;margin: 3px 0px;">学生 / Name:</div>
+                <div onclick="edit(this)" style="color:#d48214;margin: 3px 0px;">王琳</div>
+                <div style="color:gray;margin: 3px 0px;">学号 / No:</div>
+                <div onclick="edit(this)" style="color:#d48214;margin: 3px 0px;">1906040323</div>
+                <div style="color:gray;margin: 3px 0px;">有效期 / Time:</div>
+                <div id="expireTime" style="color:#d48214;margin: 3px 0px;"></div>
+            </div>
+            <div
+                style="float: right; margin-right: 30px;width:220px;height:200px;background:url('images/logo.png');background-repeat:no-repeat;background-size:100% 100%;">
+            </div>
+        </div>
+        <div style="height:80px;text-align:center;position: relative;z-index: 0;">
+            <div style="position: absolute;z-index: 1;">
+                <img src="images/timezone.png" width="78%" height="100%">
+            </div>
+            <div style="font-family: Microsoft YaHei;font-size:48px; font-weight: bold; color:#d48214;position: relative;z-index: 2;top:11px;letter-spacing: 4px;">
+                <span id="localHour"></span>
+                <span id="localMinute"></span>
+                <span id="localSecond"></span>
+                <span id="localMillisecond"></span>
+            </div>
+        </div>
+        <div style="height:50px;font-size:17px;color:#eca83b;text-align: center; margin-top: 30px;">
+            <span style="color:lightgray;margin-right:15px;">—————</span>
+            <span id="localDate"></span>
+            <span style="color:lightgray;margin-left:15px;">—————</span>
+        </div>
+        <div style="height: 32px; font-size: 21px; color: #d48214;text-align: center;font-family: Microsoft YaHei;">校 园 安 全，共 同 守 护</div>
+        <div style="font-size: 10px; color: #d48214;text-align: center;font-family: Microsoft YaHei;letter-spacing: 3px;">Campus security responsibility</div>
+        <div style="margin-top:64px;height: 25px;line-height: 25px;  font-size: 10px; background-color: #d48214; color: white;text-align: center;">
+            ©2016-2020 by www.cezone.cn All rights reserverd.
+        </div>
+    </div>
+
+    <script>
+        //时间为一位数时显示格式为："0X"
+        function checkTime(i) {
+            if (i < 10) {
+                i = "0" + i;
+            }
+            return i;
+        }
+
+        //时间为一位数时显示格式为："00X"
+        function checkMiniSecond(i) {
+            if (i < 10) {
+                i = "00" + i;
+            }
+            else if (i < 100) {
+                i = "0" + i;
+            }
+            return i;
+        }
+
+        //实现div内容可编辑
+        var titleEditing = false;
+        function edit(element) {
+            //console.log(titleEditing)
+            if (titleEditing) {
+                return;
+            }
+            titleEditing = true;
+            let old = element.innerHTML;
+            element.innerHTML = "";
+            var newObj = document.createElement("textarea");
+            newObj.className = "textArea";
+            newObj.innerHTML = old;
+            element.append(newObj);
+            newObj.focus();
+            newObj.onblur = function () {
+                element.innerHTML = this.value ? this.value : old;
+                titleEditing = false;
+            }
+        }
+
+        //显示浏览器现在的时间
+        function formatTime(timeVal) {
+            var datePara = new Date(timeVal);//定义日期对象
+
+            var hh = datePara.getHours();//通过日期对象的getHours方法返回时
+            var mm = datePara.getMinutes();//通过日期对象的getMinutes方法返回分
+            var ss = datePara.getSeconds();//通过日期对象的getSeconds方法返回秒
+            var mss = datePara.getMilliseconds();//通过日期对象的getMilliseconds方法返回毫秒
+
+            // 如果分钟或小时的值小于10，则在其值前加0，比如如果时间是下午3点20分9秒的话，则显示15：20：09
+            hh = checkTime(hh);
+            mm = checkTime(mm);
+            ss = checkTime(ss);
+            mss = checkMiniSecond(mss);
+
+            //setTimeout('formatTime()', 1000);//每一秒中重新加载formatTime()方法
+            $("#localHour").html(hh);
+            $("#localMinute").html(mm);
+            $("#localSecond").html(ss);
+            $("#localMillisecond").html(mss);
+            // return hh + ":" + mm + ":" + ss + ":" + mss; //+ " " + day;
+        }
+
+        //显示浏览器现在的日期
+        function formatDate(timeVal) {
+            var datePara = new Date(timeVal);//定义日期对象
+            var yyyy = datePara.getFullYear();//通过日期对象的getFullYear()方法返回年
+            var MM = datePara.getMonth() + 1;//通过日期对象的getMonth()方法返回月
+            var dd = datePara.getDate();//通过日期对象的getDate()方法返回日
+
+            // 如果分钟或小时的值小于10，则在其值前加0，比如如果时间是下午3点20分9秒的话，则显示15：20：09
+            MM = checkTime(MM);
+            dd = checkTime(dd);
+
+            //用于保存星期（getDay()方法得到星期编号）
+            var day;
+            if (datePara.getDay() == 0) day = "星期日 "
+            if (datePara.getDay() == 1) day = "星期一 "
+            if (datePara.getDay() == 2) day = "星期二 "
+            if (datePara.getDay() == 3) day = "星期三 "
+            if (datePara.getDay() == 4) day = "星期四 "
+            if (datePara.getDay() == 5) day = "星期五 "
+            if (datePara.getDay() == 6) day = "星期六 "
+
+            return yyyy + "年" + MM + "月" + dd + "日";
+        }
+
+        //显示有效期
+        function formatExpireDate(timeVal, addDay) {
+            var datePara = new Date(timeVal);//定义日期对象
+            var yyyy = datePara.getFullYear();//通过日期对象的getFullYear()方法返回年
+            var MM = datePara.getMonth() + 1;//通过日期对象的getMonth()方法返回月
+            var dd = datePara.getDate() + addDay;//通过日期对象的getDate()方法返回日
+
+            // 如果分钟或小时的值小于10，则在其值前加0，比如如果时间是下午3点20分9秒的话，则显示15：20：09
+            MM = checkTime(MM);
+            dd = checkTime(dd);
+
+            return yyyy + "-" + MM + "-" + dd + "止";
+        }
+
+        //服务器现在的时间（这里只是测试，就用浏览器时间代替）
+        var curTime = '';
+
+        //倒计时
+        function setTimer() {
+            curTime = new Date();
+            $("#expireTime").html(formatExpireDate(curTime, 0));
+            $("#localTime").html(formatTime(curTime));
+            $("#localDate").html(formatDate(curTime));
+        }
+
+        //每秒循环一次，刷新活动截止时间与当前时间的时间差
+        var id = setInterval(setTimer, 1);
+    </script>
+</body>
+
+</html>
